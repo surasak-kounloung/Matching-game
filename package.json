@@ -1,0 +1,45 @@
+{
+  "name": "vsq-matching-game",
+  "version": "1.0.0",
+  "description": "��#\u0000 \u0000M\u0000a\u0000t\u0000c\u0000h\u0000i\u0000n\u0000g\u0000-\u0000g\u0000a\u0000m\u0000e\u0000\r\u0000 \u0000",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/surasak-kounloung/Matching-game.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/surasak-kounloung/Matching-game/issues"
+  },
+  "homepage": "https://github.com/surasak-kounloung/Matching-game#readme",
+  "dependencies": {
+    "@fontsource/ibm-plex-sans-thai": "^5.3.0",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1"
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "^7.0.1",
+    "@testing-library/react": "^16.3.3",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.3.0",
+    "jsdom": "^31.0.1",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.8",
+    "vitest": "^5.1.0"
+  },
+  "private": true
+}
