@@ -19,7 +19,8 @@ const setup = () => {
   const press = (name: string, scope: HTMLElement = container) =>
     fireEvent.click(within(scope).getByRole('button', { name }));
   const layout = () => all().map((el) => el.querySelector('.card__front')?.textContent);
-  return { clock, all, tap, withValue, matchPairs, press, layout };
+  const concealed = () => container.querySelector<HTMLElement>('[data-concealed="true"]');
+  return { clock, all, tap, withValue, matchPairs, press, layout, concealed };
 };
 const value = (id: string) => screen.getByTestId(id).textContent;
 
@@ -107,4 +108,26 @@ it('7. cards cannot be opened before the round starts, and revealed cards cannot
   expect(a!.dataset.face).toBe('up');
   expect(b!.dataset.face).toBe('up');
   expect(value('counter-value')).toBe('0/7');
+});
+it('8. conceals the whole board while ready: on first load and after a restart, never during or after a round', () => {
+  const { clock, matchPairs, press, concealed } = setup();
+  const coversAllCards = () => expect(concealed()?.querySelectorAll('[data-card]')).toHaveLength(42);
+  coversAllCards();
+  press('เริ่มเกม');
+  expect(concealed()).toBeNull();
+  clock.advance(20_000);
+  expect(screen.getByRole('dialog', { name: 'หมดเวลาแล้ว!' })).toBeInTheDocument();
+  expect(concealed()).toBeNull();
+  clock.advance(1_000);
+  press('เริ่มเกมใหม่', screen.getByRole('dialog'));
+  coversAllCards();
+  clock.advance(500);
+  press('เริ่มเกม');
+  expect(concealed()).toBeNull();
+  matchPairs(7);
+  expect(screen.getByRole('dialog', { name: 'ยินดีด้วย!' })).toBeInTheDocument();
+  expect(concealed()).toBeNull();
+  clock.advance(1_000);
+  press('เริ่มเกมใหม่', screen.getByRole('dialog'));
+  coversAllCards();
 });

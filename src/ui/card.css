@@ -1,3 +1,8 @@
+/* The board draws no box of its own; it only carries the concealed state down to the cards. */
+.board {
+  display: contents;
+}
+
 .card {
   position: absolute;
   width: 187px;
@@ -21,6 +26,16 @@
 
 .card:not([data-face='down']) .card__inner {
   transform: rotateY(180deg);
+}
+
+/* Before a round no number face is drawn and no card turns, not even for one frame:
+   a reset swaps in the next round's numbers, and they must never turn past the viewer. */
+.board[data-concealed='true'] .card__inner {
+  transition: none;
+}
+
+.board[data-concealed='true'] .card__front {
+  visibility: hidden;
 }
 
 .card__back,

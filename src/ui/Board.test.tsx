@@ -5,9 +5,9 @@ import { Board } from './Board';
 
 const cards = (faces: Partial<Record<number, CardView['face']>> = {}): CardView[] =>
   Array.from({ length: 42 }, (_, id) => ({ id, value: id < 14 ? '48' : '84', face: faces[id] ?? 'down' }));
-const setup = (list = cards(), disabled = false) => {
+const setup = (list = cards(), disabled = false, concealed = false) => {
   const onFlip = vi.fn();
-  const { container } = render(<Board cards={list} disabled={disabled} onFlip={onFlip} />);
+  const { container } = render(<Board cards={list} disabled={disabled} concealed={concealed} onFlip={onFlip} />);
   const card = (id: number) => container.querySelector<HTMLElement>(`[data-card="${id}"]`)!;
   return { onFlip, card, container };
 };
@@ -44,6 +44,12 @@ it('ignores every touch while the board is disabled', () => {
   const { onFlip, card } = setup(cards(), true);
   touch(card(7));
   expect(onFlip).not.toHaveBeenCalled();
+});
+it('marks the element holding every card as concealed only when asked, keeping the numbers in the DOM', () => {
+  const concealedBoard = setup(cards(), true, true).container.querySelector('[data-concealed="true"]');
+  expect(concealedBoard?.querySelectorAll('[data-card]')).toHaveLength(42);
+  expect(concealedBoard?.querySelector('[data-card="3"] .card__front')).toHaveTextContent('48');
+  expect(setup().container.querySelector('[data-concealed="true"]')).toBeNull();
 });
 it('non-primary button: a right or middle mouse button does not flip a card', () => {
   const { onFlip, card } = setup();

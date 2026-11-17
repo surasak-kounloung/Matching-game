@@ -20,7 +20,7 @@ export function App({ deps }: { deps?: Partial<GameDeps> }) {
       <Counter pairs={game.pairs} total={gameConfig.targetPairs} />
       <Timer seconds={game.secondsLeft} expired={game.phase === 'timeUp'} />
       <ActionButton mode={ready ? 'start' : 'restart'} onPress={ready ? game.start : game.restart} />
-      <Board cards={game.cards} disabled={game.phase !== 'playing'} onFlip={game.flip} />
+      <Board cards={game.cards} disabled={game.phase !== 'playing'} concealed={ready} onFlip={game.flip} />
       {(game.phase === 'timeUp' || game.phase === 'won') && (
         <ResultPopup variant={game.phase} pairs={game.pairs} onRestart={game.restart} />
       )}
