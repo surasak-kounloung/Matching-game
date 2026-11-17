@@ -1,0 +1,35 @@
+:root {
+  --font-game: 'Gotham', 'IBM Plex Sans Thai', sans-serif; /* Gotham ไม่มีอักษรไทย ไทยจึงตกไปที่ IBM Plex */
+
+  --blue: #3880f4;
+  --ink: #435b9d;
+  --red: #b61010;
+  --page-bg: #f7f7f7;
+
+  --card-open-fill: #cedefb;
+  --card-open-stroke: #ffffff;
+  --card-matched-fill: #e6fdc8;
+  --card-matched-stroke: #4d7400;
+  --card-matched-ink: #4d7400;
+  --card-shadow: 3.5px 6px 7px 1px rgba(120, 169, 250, 0.86);
+  --card-bevel: inset 0 9px 9px -5px rgba(255, 255, 255, 0.45);
+  --card-number-stroke: 12px #ffffff;                     /* เส้นขอบนอก 6 = stroke 12 วาดไว้ใต้ตัวเลข */
+  --card-number-shadow: drop-shadow(0 4px 4px rgba(90, 134, 200, 0.6));
+
+  --box-fill: #ffffff;
+  --box-border: 3px solid #949494;
+  --box-shadow: 3.5px 6px 7px 1px rgba(188, 188, 188, 0.86);
+  --timer-expired-fill: #ffeded;
+  --timer-expired-border: 3px solid #df0505;
+  --text-glow: 0 0 4px rgba(18, 32, 73, 0.35);
+
+  --button-fill: #387ced;
+  --button-bevel: inset 0 9px 9px -4px rgba(255, 255, 255, 0.35);
+  --button-shadow: 3.5px 6px 7px 1px rgba(188, 188, 188, 0.86);
+  --button-label-shadow: 0 2px 4px rgba(107, 163, 255, 0.65);
+
+  --popup-fill: #ffffff;
+  --popup-border: 11px solid #3880f4;
+  --popup-shadow: 3.5px 6px 7px 1px rgba(106, 106, 106, 0.86);
+  --popup-clock-shadow: drop-shadow(0 10px 9px rgba(156, 191, 222, 0.58));
+}

@@ -1,0 +1,20 @@
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+  background: var(--page-bg);
+  overflow: hidden;
+}
+
+.stage {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1497px;
+  height: 2664px;
+  transform-origin: 0 0;
+  background: url('../assets/img/stage-bg.webp') no-repeat 0 0 / 1497px 2664px;
+  font-family: var(--font-game);
+  font-weight: 500;
+}

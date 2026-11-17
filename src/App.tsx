@@ -1,3 +1,5 @@
+import { Stage } from './ui/Stage';
+
 export function App() {
-  return <div data-testid="stage" />;
+  return <Stage />;
 }
