@@ -71,6 +71,15 @@ export function gameReducer(
     case 'restart': {
       if (state.phase === 'ready') return state;
       const current = catchUp(state, event.at);
+      // The second tap of a double tap on start lands on the restart button that replaces it,
+      // so restart is ignored for startLockMs after the round started (deadline - timeLimitMs).
+      if (
+        current.phase === 'playing' &&
+        current.deadline !== null &&
+        event.at < current.deadline - config.timeLimitMs + config.startLockMs
+      ) {
+        return current;
+      }
       if (
         (current.phase === 'timeUp' || current.phase === 'won') &&
         current.endedAt !== null &&

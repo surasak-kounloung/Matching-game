@@ -115,6 +115,10 @@ describe('restart', () => {
     expect(run([start, restart(DEADLINE + 999)]).phase).toBe('timeUp');
     expect(run([start, restart(DEADLINE + 1_000)]).phase).toBe('ready');
   });
+  it('28. restart is ignored for 500 ms after a round starts, so a double tap on start cannot cancel it', () => {
+    ignored(run([start]), restart(T0 + 499));
+    expect(run([start, restart(T0 + 500)]).phase).toBe('ready');
+  });
 });
 
 describe('robustness', () => {

@@ -131,3 +131,14 @@ it('8. conceals the whole board while ready: on first load and after a restart, 
   press('เริ่มเกมใหม่', screen.getByRole('dialog'));
   coversAllCards();
 });
+it('9. a double tap on start does not cancel the round it starts', () => {
+  const { clock, press } = setup();
+  press('เริ่มเกม');
+  press('เริ่มเกมใหม่');            // แตะครั้งที่สองตกบนปุ่มเดิม ซึ่งตอนนี้เป็น "เริ่มเกมใหม่"
+  clock.advance(1_000);
+  expect(screen.queryByRole('button', { name: 'เริ่มเกม' })).toBeNull();
+  expect(value('timer-value')).toBe('19');
+  press('เริ่มเกมใหม่');            // หลัง 500 ms การกด "เริ่มเกมใหม่" รีเซ็ตได้ตามปกติ
+  expect(screen.getByRole('button', { name: 'เริ่มเกม' })).toBeInTheDocument();
+  expect(value('timer-value')).toBe('20');
+});
