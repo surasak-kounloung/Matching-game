@@ -77,6 +77,8 @@ describe('time', () => {
   });
   it('16. a very late tick still ends the round at the deadline', () =>
     expect(run([start, tick(DEADLINE + 60_000)])).toMatchObject({ phase: 'timeUp', endedAt: DEADLINE }));
+  it('27. a flip one millisecond before the deadline is still accepted', () =>
+    expect(run([start, flip(0, DEADLINE - 1)]).open).toEqual([0]));
   it('23. a tick with nothing to do returns the same state object', () => {
     ignored(run([start]), tick(T0 + 50));
     ignored(run([start, flip(0), flip(14)]), tick(T0 + 599));
@@ -107,6 +109,12 @@ describe('restart', () => {
     expect(gameReducer(ready, { type: 'start', at: T0 + 3_500 }, cfg)).toMatchObject({ phase: 'playing', deadline: T0 + 23_500 });
   });
   it('21. restart does nothing while already ready', () => ignored(initialState(deck), restart(T0)));
+  it('25. a restart that arrives after the deadline, before any tick, is held by the 1000 ms lock', () => {
+    const late = run([start, flip(0), flip(1), restart(DEADLINE + 10)]);
+    expect(late).toMatchObject({ phase: 'timeUp', endedAt: DEADLINE, pairs: 1 });
+    expect(run([start, restart(DEADLINE + 999)]).phase).toBe('timeUp');
+    expect(run([start, restart(DEADLINE + 1_000)]).phase).toBe('ready');
+  });
 });
 
 describe('robustness', () => {
@@ -114,6 +122,7 @@ describe('robustness', () => {
     expect(run([start, flip(0), flip(14), flip(1)]).open).toEqual([0, 14]);
     expect(run([start, flip(0), flip(1), flip(2)])).toMatchObject({ pairs: 1, open: [2] });
   });
+  it('26. a flip for a card that does not exist is ignored', () => ignored(run([start]), flip(99)));
   it('24. never mutates the state it is given', () => {
     const freeze = (s: GameState): GameState =>
       Object.freeze({ ...s, cards: Object.freeze(s.cards.map((c) => Object.freeze({ ...c }))), open: Object.freeze([...s.open]) });

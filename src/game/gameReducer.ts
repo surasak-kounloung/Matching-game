@@ -70,12 +70,13 @@ export function gameReducer(
     }
     case 'restart': {
       if (state.phase === 'ready') return state;
+      const current = catchUp(state, event.at);
       if (
-        (state.phase === 'timeUp' || state.phase === 'won') &&
-        state.endedAt !== null &&
-        event.at < state.endedAt + config.restartLockMs
+        (current.phase === 'timeUp' || current.phase === 'won') &&
+        current.endedAt !== null &&
+        event.at < current.endedAt + config.restartLockMs
       ) {
-        return state;
+        return current;
       }
       return initialState(event.deck, event.at);
     }
