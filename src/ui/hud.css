@@ -35,23 +35,25 @@
 .hud-number {
   font-size: 104.8px;
   color: var(--blue);
+  font-kerning: none;
 }
 
-/* Border is 3px, so positions inside are relative to the padding box: subtract 3 more. */
-.counter__label { left: 100px; top: 15px; width: 121px; height: 53px; line-height: 53px; }
-.counter__value { left: 61px; top: 69px; width: 183px; height: 98px; line-height: 98px; }
+/* Border is 3px, so positions inside are relative to the padding box: subtract 3 more.
+   The PSD text boxes were then nudged by the offsets measured against the references. */
+.counter__label { left: 99px; top: 11px; width: 121px; height: 53px; line-height: 53px; }
+.counter__value { left: 59px; top: 66px; width: 183px; height: 98px; line-height: 98px; }
 
-.timer__label { left: 96px; top: 19px; width: 165px; height: 35px; line-height: 35px; }
+.timer__label { left: 92px; top: 20px; width: 165px; height: 35px; line-height: 35px; }
 .timer__row {
   position: absolute;
-  left: 23px;
-  top: 78px;
+  left: 22px;
+  top: 77px;
   width: 303px;
   height: 77px;
   display: flex;
   justify-content: center;
   align-items: baseline;
-  gap: 12px;
+  gap: 16px;
   white-space: nowrap;
 }
 .timer__row .hud-number,
@@ -75,12 +77,29 @@
   border: 0;
   border-radius: 38px;
   background: var(--button-fill);
-  box-shadow: var(--button-bevel), var(--button-shadow);
+  box-shadow: var(--button-shadow);
   color: #ffffff;
   font: inherit;
   cursor: pointer;
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
+}
+/* Photoshop's "Ring - Double" bevel shows as a soft light rim 1-6px inside the top,
+   3-7px inside the sides, fading to a faint line 8px above the bottom edge.
+   The rim is an inset shadow (bands: top 5, sides 3.5, bottom 2) inside a transparent
+   2px border, so the blur can spread outwards without being cut by the fade mask. */
+.action-button::before {
+  content: '';
+  position: absolute;
+  inset: -1px 1.75px 5.5px 1px;
+  box-sizing: border-box;
+  border: 2px solid transparent;
+  border-radius: 37px;
+  box-shadow: inset 0 1.5px 0 3.5px var(--button-bevel);
+  filter: blur(1px); /* Chrome draws a smaller blur as no blur at all */
+  -webkit-mask: linear-gradient(#000 35%, rgba(0, 0, 0, 0.35) 90%);
+  mask: linear-gradient(#000 35%, rgba(0, 0, 0, 0.35) 90%);
+  pointer-events: none;
 }
 .action-button__label {
   position: absolute;
@@ -91,19 +110,19 @@
   text-align: center;
   white-space: nowrap;
   font-size: 51.2px;
-  line-height: 56px;
+  line-height: 60px;
   text-shadow: var(--button-label-shadow);
 }
 .action-button__line { display: block; }
 .action-button--start .action-button__label { inset: 0; }
-.action-button--restart .action-button__label { left: 92px; top: 15px; width: 147px; height: 113px; }
+.action-button--restart .action-button__label { left: 91px; top: 19px; width: 147px; height: 120px; }
 .action-button__icon {
   position: absolute;
   left: 19px;
   top: 41px;
   width: 59px;
   height: 63px;
-  background: #ffffff;
-  -webkit-mask: url('../assets/img/icon-restart.png') center / 100% 100% no-repeat;
-  mask: url('../assets/img/icon-restart.png') center / 100% 100% no-repeat;
+  /* the icon image is white on transparent; a mask would cut off the drop shadow */
+  background: url('../assets/img/icon-restart.png') center / 100% 100% no-repeat;
+  filter: var(--button-icon-shadow);
 }

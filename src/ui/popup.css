@@ -15,17 +15,20 @@
   to { opacity: 1; transform: scale(1); }
 }
 
+/* Clock and headline are centred together, so the shorter won headline stays centred
+   with its clock. The right offset puts the time-up headline where the PSD has it
+   (clock image left 332, text 24px after the clock). */
 .popup__headline {
   position: absolute;
   left: 0;
-  right: 0;
+  right: 5px;
   top: 47px; /* clock image top 1696 */
   height: 193px;
   display: flex;
   flex-direction: row;
   justify-content: center;
   align-items: flex-start;
-  gap: 32px;
+  gap: 18px;
 }
 .popup__clock {
   display: block;
@@ -34,18 +37,16 @@
 }
 .popup__headline-text {
   display: block;
-  width: 611px;
-  margin-top: 24px; /* PSD text top 1720 minus clock top 1696 */
+  margin-top: 33px;
   font-size: 107.6px;
   line-height: 98px;
   white-space: nowrap;
-  text-align: center;
   color: var(--red);
 }
 
 .popup__result {
   position: absolute;
-  left: 0;
+  left: -3px;
   right: 0;
   top: 227px; /* number box top 1876 */
   display: flex;
@@ -62,7 +63,9 @@
 }
 .popup__result-number {
   display: block;
-  margin: 0 38px 0 28px;
+  position: relative;
+  top: -1px; /* the PSD number sits 1px above the text's baseline */
+  margin: 0 24px 0 25px;
   font-size: 171.5px;
   line-height: 121px;
   color: var(--blue);
@@ -77,5 +80,6 @@
 
 /* Same look as the bar button, at the popup button's size. */
 .popup-button { border-radius: 51px; }
-.popup-button .action-button__label { left: 143px; top: 17px; width: 226px; height: 53px; line-height: 53px; }
+.popup-button::before { border-radius: 50px; }
+.popup-button .action-button__label { left: 142px; top: 24px; width: 226px; height: 53px; line-height: 53px; }
 .popup-button .action-button__icon { left: 55px; top: 18px; }

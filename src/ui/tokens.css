@@ -11,25 +11,40 @@
   --card-matched-fill: #e6fdc8;
   --card-matched-stroke: #4d7400;
   --card-matched-ink: #4d7400;
-  --card-shadow: 3.5px 6px 7px 1px rgba(120, 169, 250, 0.86);
-  --card-bevel: inset 0 9px 9px -5px rgba(255, 255, 255, 0.45);
-  --card-number-stroke: 12px #ffffff;                     /* เส้นขอบนอก 6 = stroke 12 วาดไว้ใต้ตัวเลข */
-  --card-number-shadow: drop-shadow(0 4px 4px rgba(90, 134, 200, 0.6));
+  /* Photoshop drop shadow: distance 7 at 120deg, size 7, choke 30%. It is cast by the
+     shape without its 3px stroke effect, hence the negative spread on the stroked card box. */
+  --card-shadow: 3.5px 6px 4.5px -1px rgba(120, 169, 250, 0.86);
+  /* White outside stroke 6 around the digits, drawn as 16 unblurred text-shadows on a 6px
+     circle. -webkit-text-stroke cannot be used: Chrome paints the fill's text-shadow over the
+     stroke, while in the PSD the stroke covers the shadow. */
+  --card-number-outline:
+    6px 0 #fff, 5.54px 2.3px #fff, 4.24px 4.24px #fff, 2.3px 5.54px #fff,
+    0 6px #fff, -2.3px 5.54px #fff, -4.24px 4.24px #fff, -5.54px 2.3px #fff,
+    -6px 0 #fff, -5.54px -2.3px #fff, -4.24px -4.24px #fff, -2.3px -5.54px #fff,
+    0 -6px #fff, 2.3px -5.54px #fff, 4.24px -4.24px #fff, 5.54px -2.3px #fff;
+  /* Under the outline: the digits' multiply shadow (90,134,200), distance 4 down, size 9,
+     choke 18% (offset includes the spread), in the colour it gives on each fill. */
+  --card-number-shadow: 0 5.6px 6px rgb(73, 117, 198);
+  --card-matched-number-shadow: 0 5.6px 6px rgb(81, 133, 157);
 
   --box-fill: #ffffff;
   --box-border: 3px solid #949494;
-  --box-shadow: 3.5px 6px 7px 1px rgba(188, 188, 188, 0.86);
+  --box-shadow: none;                                     /* effects of the counter/timer boxes are switched off in the PSD */
   --timer-expired-fill: #ffeded;
   --timer-expired-border: 3px solid #df0505;
-  --text-glow: 0 0 4px rgba(18, 32, 73, 0.35);
+  --text-glow: none;                                      /* effects of the HUD and pop-up text are switched off in the PSD */
 
   --button-fill: #387ced;
-  --button-bevel: inset 0 9px 9px -4px rgba(255, 255, 255, 0.35);
-  --button-shadow: 3.5px 6px 7px 1px rgba(188, 188, 188, 0.86);
-  --button-label-shadow: 0 2px 4px rgba(107, 163, 255, 0.65);
+  --button-bevel: rgba(255, 255, 255, 0.45);              /* colour of the bevel rim */
+  --button-shadow: 3.5px 5px 4px 2.5px rgba(188, 188, 188, 0.86);
+  /* multiply shadow (107,163,255) 65%, distance 2 down, size 4: its colour over the button
+     fill; alpha raised to 0.9 to match the measured darkness under the thin strokes */
+  --button-label-shadow: 0 2.5px 2.5px rgba(23, 79, 237, 0.9);
+  --button-icon-shadow: drop-shadow(0 2.5px 1.25px rgba(23, 79, 237, 0.9));
 
   --popup-fill: #ffffff;
   --popup-border: 11px solid #3880f4;
-  --popup-shadow: 3.5px 6px 7px 1px rgba(106, 106, 106, 0.86);
-  --popup-clock-shadow: drop-shadow(0 10px 9px rgba(156, 191, 222, 0.58));
+  --popup-shadow: 3.5px 5px 4px 2.5px rgba(106, 106, 106, 0.86);
+  /* PSD: distance 10, size 9, choke 33%, cast by the clock without its 6px white stroke */
+  --popup-clock-shadow: drop-shadow(0 7.5px 2px rgba(156, 191, 222, 0.58));
 }

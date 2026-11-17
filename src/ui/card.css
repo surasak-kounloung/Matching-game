@@ -48,21 +48,30 @@
   transform: rotateY(180deg);
   background: var(--card-open-fill);
   border: 3px solid var(--card-open-stroke);
-  box-shadow: var(--card-shadow), var(--card-bevel);
   font-family: var(--font-game);
   font-size: 100px;
   line-height: 1;
   color: var(--blue);
-  -webkit-text-stroke: var(--card-number-stroke);
-  paint-order: stroke fill;
-  filter: var(--card-number-shadow);
+  /* the first shadow is painted on top: outline above the digits' shadow */
+  text-shadow: var(--card-number-outline), var(--card-number-shadow);
 }
 
 .card[data-face='matched'] .card__front {
   background: var(--card-matched-fill);
   border-color: var(--card-matched-stroke);
   color: var(--card-matched-ink);
+  text-shadow: var(--card-number-outline), var(--card-matched-number-shadow);
   animation: card-matched-pop 250ms ease 1;
+}
+
+/* In the artwork the cards of columns 5-7 are 1px narrower (fill 180, not 181). */
+.card:is([data-card='4'], [data-card='5'], [data-card='6'],
+  [data-card='11'], [data-card='12'], [data-card='13'],
+  [data-card='18'], [data-card='19'], [data-card='20'],
+  [data-card='25'], [data-card='26'], [data-card='27'],
+  [data-card='32'], [data-card='33'], [data-card='34'],
+  [data-card='39'], [data-card='40'], [data-card='41']) {
+  width: 186px;
 }
 
 @keyframes card-matched-pop {
