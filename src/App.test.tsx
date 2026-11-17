@@ -96,11 +96,15 @@ it('6. a double tap on restart does not start the next round', () => {
   press('เริ่มเกม');
   expect(screen.getAllByRole('button', { name: 'เริ่มเกมใหม่' }).length).toBeGreaterThan(0);
 });
-it('7. cards cannot be opened before the round starts or after it ends', () => {
-  const { clock, all, tap, press } = setup();
+it('7. cards cannot be opened before the round starts, and revealed cards cannot be matched after it ends', () => {
+  const { clock, all, tap, withValue, press } = setup();
   tap(all()[0]!);
   expect(all()[0]!.dataset.face).toBe('down');
   press('เริ่มเกม');
   clock.advance(20_000);
+  const [a, b] = withValue('48');
+  tap(a!), tap(b!);
+  expect(a!.dataset.face).toBe('up');
+  expect(b!.dataset.face).toBe('up');
   expect(value('counter-value')).toBe('0/7');
 });
