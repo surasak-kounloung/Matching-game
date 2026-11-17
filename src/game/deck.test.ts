@@ -30,6 +30,10 @@ describe('shuffle', () => {
     expect(input).toEqual(['a', 'b', 'c', 'd', 'e']);
     expect([...out].sort()).toEqual(input);
   });
+  it('gives different orders for different random sources', () => {
+    const items = buildDeckValues(cfg);
+    expect(shuffle(items, mulberry32(1))).not.toEqual(shuffle(items, mulberry32(2)));
+  });
   it('gives every ordering a near-equal chance', () => {
     const rng = mulberry32(48);
     const seen = new Map<string, number>();

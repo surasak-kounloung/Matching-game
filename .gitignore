@@ -21,3 +21,4 @@ fonts/
 # ===== เอกสารภายในและภาพอ้างอิง ไม่ขึ้น repository สาธารณะ =====
 docs/superpowers/
 docs/design-reference/
+.superpowers/

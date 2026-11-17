@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, onTestFinished, vi } from 'vitest';
 import { installKioskGuards, keepScreenAwake } from './kiosk';
 
 const fire = (type: string, init: Record<string, unknown> = {}) => {
@@ -17,6 +17,19 @@ describe('installKioskGuards', () => {
     expect(fire('touchmove', { touches: [{}, {}] })).toBe(true);
     for (const key of ['+', '=', '-', '0']) expect(fire('keydown', { ctrlKey: true, key })).toBe(true);
     remove();
+  });
+  it('blocks keyboard zoom by key position too, so a Thai keyboard layout cannot zoom', () => {
+    onTestFinished(installKioskGuards());
+    const thaiLayout = [
+      { code: 'Minus', key: 'ข' },
+      { code: 'Equal', key: 'ช' },
+      { code: 'Digit0', key: 'จ' },
+      { code: 'NumpadAdd', key: '+' },
+      { code: 'NumpadSubtract', key: '-' },
+      { code: 'Numpad0', key: '0' },
+    ];
+    for (const { code, key } of thaiLayout) expect(fire('keydown', { ctrlKey: true, key, code }), code).toBe(true);
+    expect(fire('keydown', { ctrlKey: false, key: 'ข', code: 'Minus' })).toBe(false);
   });
   it('leaves ordinary input alone', () => {
     const remove = installKioskGuards();
