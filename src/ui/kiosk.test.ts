@@ -47,11 +47,17 @@ describe('keepScreenAwake', () => {
     visible('visible');
     expect(request).toHaveBeenCalledTimes(2);
   });
-  it('does nothing, without throwing, when wake lock is unsupported or refused', async () => {
+  it('stays silent when wake lock is unsupported, and logs a warning when the request is refused', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
     expect(() => keepScreenAwake(document, {} as Navigator)()).not.toThrow();
-    const request = vi.fn().mockRejectedValue(new Error('denied'));
-    keepScreenAwake(document, { wakeLock: { request } } as unknown as Navigator);
+    expect(warn).not.toHaveBeenCalled();
+    const error = new Error('denied');
+    const request = vi.fn().mockRejectedValue(error);
+    const stop = keepScreenAwake(document, { wakeLock: { request } } as unknown as Navigator);
     await Promise.resolve();
-    expect(request).toHaveBeenCalled();
+    await Promise.resolve();
+    expect(request).toHaveBeenCalledExactlyOnceWith('screen');
+    expect(warn).toHaveBeenCalledExactlyOnceWith('wake lock failed', error);
+    stop();
   });
 });

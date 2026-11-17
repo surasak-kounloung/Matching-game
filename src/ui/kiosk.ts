@@ -33,11 +33,12 @@ export function installKioskGuards(doc: Document = document): () => void {
 
 /** Request a screen wake lock, and again whenever the page becomes visible. Returns a canceller. */
 export function keepScreenAwake(doc: Document = document, nav: Navigator = navigator): () => void {
+  const warn = (error: unknown) => console.warn('wake lock failed', error);
   const request = () => {
     try {
-      nav.wakeLock?.request('screen')?.catch(() => undefined);
-    } catch {
-      // unsupported or refused: nothing to do
+      nav.wakeLock?.request('screen')?.catch(warn);
+    } catch (error) {
+      warn(error);
     }
   };
   const onVisible = () => {
