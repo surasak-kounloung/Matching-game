@@ -1,0 +1,81 @@
+/* Children are positioned from the popup's padding box (inside the 11px border).
+   PSD text boxes minus the popup origin (203, 1649). */
+.popup {
+  position: absolute;
+  box-sizing: border-box;
+  background: var(--popup-fill);
+  border: var(--popup-border);
+  border-radius: 104px;
+  box-shadow: var(--popup-shadow);
+  transform-origin: 50% 50%;
+  animation: popup-in 200ms ease-out both;
+}
+@keyframes popup-in {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.popup__headline {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 47px; /* clock image top 1696 */
+  height: 193px;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 32px;
+}
+.popup__clock {
+  display: block;
+  filter: var(--popup-clock-shadow);
+  user-select: none;
+}
+.popup__headline-text {
+  display: block;
+  width: 611px;
+  margin-top: 24px; /* PSD text top 1720 minus clock top 1696 */
+  font-size: 107.6px;
+  line-height: 98px;
+  white-space: nowrap;
+  text-align: center;
+  color: var(--red);
+}
+
+.popup__result {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 227px; /* number box top 1876 */
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: baseline;
+  white-space: nowrap;
+}
+.popup__result-text {
+  display: block;
+  font-size: 93.2px;
+  line-height: 112px;
+  color: var(--ink);
+}
+.popup__result-number {
+  display: block;
+  margin: 0 38px 0 28px;
+  font-size: 171.5px;
+  line-height: 121px;
+  color: var(--blue);
+}
+
+.popup__mascot {
+  position: absolute;
+  display: block;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* Same look as the bar button, at the popup button's size. */
+.popup-button { border-radius: 51px; }
+.popup-button .action-button__label { left: 143px; top: 17px; width: 226px; height: 53px; line-height: 53px; }
+.popup-button .action-button__icon { left: 55px; top: 18px; }
