@@ -1,0 +1,76 @@
+.card {
+  position: absolute;
+  width: 187px;
+  height: 186px;
+  padding: 0;
+  border: 0;
+  border-radius: 35px;
+  background: none;
+  font: inherit;
+  touch-action: none;
+  perspective: 800px;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.card__inner {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+  transition: transform 250ms ease;
+}
+
+.card:not([data-face='down']) .card__inner {
+  transform: rotateY(180deg);
+}
+
+.card__back,
+.card__front {
+  position: absolute;
+  inset: 0;
+  border-radius: 35px;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  box-shadow: var(--card-shadow);
+}
+
+.card__back {
+  background-image: url('../assets/img/cards-closed.webp');
+  background-size: 1356px 1165px;
+  background-repeat: no-repeat;
+  background-position: var(--sprite-x) var(--sprite-y);
+}
+
+.card__front {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform: rotateY(180deg);
+  background: var(--card-open-fill);
+  border: 3px solid var(--card-open-stroke);
+  box-shadow: var(--card-shadow), var(--card-bevel);
+  font-family: var(--font-game);
+  font-size: 100px;
+  line-height: 1;
+  color: var(--blue);
+  -webkit-text-stroke: var(--card-number-stroke);
+  paint-order: stroke fill;
+  filter: var(--card-number-shadow);
+}
+
+.card[data-face='matched'] .card__front {
+  background: var(--card-matched-fill);
+  border-color: var(--card-matched-stroke);
+  color: var(--card-matched-ink);
+  animation: card-matched-pop 250ms ease 1;
+}
+
+@keyframes card-matched-pop {
+  0%,
+  100% {
+    transform: rotateY(180deg) scale(1);
+  }
+  50% {
+    transform: rotateY(180deg) scale(1.08);
+  }
+}
