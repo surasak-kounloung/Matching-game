@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { gameConfig as cfg } from '../config/gameConfig';
+import { testConfig as cfg } from '../test/testConfig';
 import { buildDeckValues } from './deck';
 import { gameReducer, initialState } from './gameReducer';
 import type { GameEvent } from './types';

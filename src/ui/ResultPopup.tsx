@@ -1,5 +1,4 @@
 import type { CSSProperties } from 'react';
-import { gameConfig } from '../config/gameConfig';
 import clockImg from '../assets/img/popup-clock.png';
 import breadImg from '../assets/img/popup-bread.png';
 import peachImg from '../assets/img/popup-peach.png';
@@ -17,6 +16,7 @@ const inPopup = (r: Rect): CSSProperties => ({
 
 interface Props {
   variant: 'timeUp' | 'won';
+  /** Pairs matched in the round; on a win this is every pair. */
   pairs: number;
   onRestart: () => void;
 }
@@ -38,7 +38,7 @@ export function ResultPopup({ variant, pairs, onRestart }: Props) {
       </div>
       <div className="popup__result" data-testid="popup-result">
         <span className="popup__result-text">{won ? 'คุณจับคู่ได้ครบ' : 'คุณจับคู่ได้'}</span>
-        <span className="popup__result-number">{won ? gameConfig.targetPairs : pairs}</span>
+        <span className="popup__result-number">{pairs}</span>
         <span className="popup__result-text">คู่</span>
       </div>
       <img className="popup__mascot" src={breadImg} alt="" draggable={false} style={inPopup(POPUP_BREAD)} />

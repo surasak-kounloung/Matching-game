@@ -61,7 +61,8 @@ test('cards still turn with their animation during play, on a missed pair and at
   expect((await look(page)).flipping).toBe(2);
   await settled();
 
-  await page.clock.fastForward(gameConfig.mismatchMs);
+  // the game applies the flip-back on its first 50 ms tick at or after mismatchMs
+  await page.clock.fastForward(gameConfig.mismatchMs + 50);
   await expect(page.locator('[data-card][data-face="up"]')).toHaveCount(0);
   expect((await look(page)).flipping).toBe(2);
   await settled();

@@ -1,4 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
+import { gameConfig } from '../src/config/gameConfig';
 import { matchPairs, openGame, openMismatch, STAGE_VIEWPORT } from './helpers';
 
 /**
@@ -35,7 +36,7 @@ test('time up: popup, then the revealed board', async ({ page }) => {
   await start(page);
   await matchPairs(page, 4);
   await expect(page.getByTestId('counter-value')).toHaveText('4/7');
-  await page.clock.fastForward(20_000);
+  await page.clock.fastForward(gameConfig.timeLimitMs);
   await expect(page.getByRole('dialog', { name: 'หมดเวลาแล้ว!' })).toBeVisible();
   await shoot(page, 'timeup-popup');
 

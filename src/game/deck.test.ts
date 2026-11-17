@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { gameConfig as cfg } from '../config/gameConfig';
+import { testConfig as cfg } from '../test/testConfig';
 import { mulberry32 } from '../test/clock';
 import { buildDeckValues, createDeck, shuffle } from './deck';
 

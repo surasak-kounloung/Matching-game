@@ -2,13 +2,14 @@ import { fireEvent, render, screen, within } from '@testing-library/react';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { App } from './App';
 import { createTestClock, mulberry32 } from './test/clock';
+import { testConfig } from './test/testConfig';
 
 beforeEach(() => vi.useFakeTimers());
 afterEach(() => vi.useRealTimers());
 
 const setup = () => {
   const clock = createTestClock();
-  const { container } = render(<App deps={{ now: clock.now, rng: mulberry32(7) }} />);
+  const { container } = render(<App config={testConfig} deps={{ now: clock.now, rng: mulberry32(7) }} />);
   const all = () => Array.from(container.querySelectorAll<HTMLElement>('[data-card]'));
   const withValue = (v: string) => all().filter((el) => el.querySelector('.card__front')?.textContent === v);
   const tap = (el: HTMLElement) => fireEvent.pointerDown(el, { button: 0, pointerType: 'touch' });

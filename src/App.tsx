@@ -1,4 +1,4 @@
-import { gameConfig } from './config/gameConfig';
+import { gameConfig, type GameConfig } from './config/gameConfig';
 import { useGame, type GameDeps } from './game/useGame';
 import { ActionButton } from './ui/ActionButton';
 import { Board } from './ui/Board';
@@ -11,13 +11,19 @@ import './ui/card.css';
 import './ui/hud.css';
 import './ui/popup.css';
 
-export function App({ deps }: { deps?: Partial<GameDeps> }) {
-  const game = useGame(gameConfig, deps);
+interface AppProps {
+  /** Must be a stable module constant, never an object created during render. */
+  config?: GameConfig;
+  deps?: Partial<GameDeps>;
+}
+
+export function App({ config = gameConfig, deps }: AppProps) {
+  const game = useGame(config, deps);
   const ready = game.phase === 'ready';
   return (
     <Stage>
       <PrizeBoxes prize1={game.prize1} prize2={game.prize2} />
-      <Counter pairs={game.pairs} total={gameConfig.targetPairs} />
+      <Counter pairs={game.pairs} total={config.targetPairs} />
       <Timer seconds={game.secondsLeft} expired={game.phase === 'timeUp'} />
       <ActionButton mode={ready ? 'start' : 'restart'} onPress={ready ? game.start : game.restart} />
       <Board cards={game.cards} disabled={game.phase !== 'playing'} concealed={ready} onFlip={game.flip} />

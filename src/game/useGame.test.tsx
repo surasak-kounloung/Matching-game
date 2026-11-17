@@ -1,6 +1,6 @@
 import { act, renderHook } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { gameConfig as cfg } from '../config/gameConfig';
+import { testConfig as cfg } from '../test/testConfig';
 import { createTestClock, mulberry32 } from '../test/clock';
 import { useGame } from './useGame';
 
