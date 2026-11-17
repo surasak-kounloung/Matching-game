@@ -3,10 +3,12 @@ import { createRoot } from 'react-dom/client';
 import '@fontsource/ibm-plex-sans-thai/500.css';
 import './ui/tokens.css';
 import './ui/base.css';
+import { registerSW } from 'virtual:pwa-register';
 import { App } from './App';
 import { loadFonts } from './ui/fonts';
 import { installKioskGuards, keepScreenAwake } from './ui/kiosk';
 
+registerSW({ immediate: true });
 installKioskGuards();
 keepScreenAwake();
 
