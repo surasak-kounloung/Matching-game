@@ -19,7 +19,7 @@ import sys
 from pathlib import Path
 
 import numpy as np
-from PIL import Image
+from PIL import Image, ImageFilter
 from psd_tools import PSDImage
 
 # Thai layer names must not crash the Windows console.
@@ -64,8 +64,34 @@ PATCH_MIN_ALPHA = 250
 RING_WIDTH = 3
 RING_MAX_MEAN_DIFF = 2.0
 
+# Prize boxes in their won state: (normal-state group, product sub-group, stage
+# area, file name). The won-state group is the same name plus " active", and
+# holds the same product sub-group: the picture, its white stroke and (box 2)
+# the red tag, identical artwork in both states.
+PRIZES: list[tuple[str, str, Box, str]] = [
+    ("Box_1", "Group 10", BOX1_ACTIVE, "box1-active.webp"),
+    ("Box_2", "Group 11", BOX2_ACTIVE, "box2-active.webp"),
+]
+# Inside the product's silhouette shrunk by this many px, an overlay must equal
+# the composite to within this mean difference per channel.
+PRODUCT_SHRINK = 2
+PRODUCT_MAX_MEAN_DIFF = 1.0
+# The product sub-group's Drop Shadow, which psd-tools does not draw. The PSD
+# gives colour #67849d, opacity 43%, Normal blend, angle 90 (straight down),
+# distance 3 px, size 3 px, spread 33%. Size and spread are drawn as a Gaussian
+# blur and a gain on the blurred matte, fitted to the products' shadows on the
+# white boxes in the composite: a mean error of 0.004 in shadow alpha.
+PRODUCT_SHADOW_COLOUR = (0x67, 0x84, 0x9D)
+PRODUCT_SHADOW_OPACITY = 0.43
+PRODUCT_SHADOW_OFFSET = 3  # px down
+PRODUCT_SHADOW_SIGMA = 1.2  # px
+PRODUCT_SHADOW_GAIN = 2.0
+
 STAGE_BG_MAX_BYTES = 3_000_000
 WEBP_OPTIONS = {"quality": 95, "method": 6}
+# Lossy WebP halves colour resolution, which smears the prize boxes' green
+# border and coloured text; lossless keeps them sharp for a few kB more.
+OVERLAY_WEBP_OPTIONS = {"lossless": True, "quality": 100, "method": 6}
 # Layer renders carry a generated "sRGB built-in" profile whose bytes change on
 # every run; the pixels are already sRGB, so leave it out to keep files stable.
 PNG_OPTIONS = {"optimize": True, "icc_profile": None}
@@ -111,13 +137,14 @@ def reveal(layer) -> None:
         layer = layer.parent
 
 
-def render(layer, viewport: Box, label: str) -> Image.Image:
+def render(layer, viewport: Box, label: str, force: bool = True) -> Image.Image:
     """Render a layer or group into an RGBA image the size of the viewport.
 
     Always pass a viewport: hidden groups report a zero-size bounding box.
+    `force=False` builds each layer from the pixels Photoshop stored for it.
     """
     reveal(layer)
-    image = layer.composite(viewport=viewport, force=True)
+    image = layer.composite(viewport=viewport, force=force)
     expected = (viewport[2] - viewport[0], viewport[3] - viewport[1])
     if image is None or image.size != expected:
         got = None if image is None else image.size
@@ -165,17 +192,90 @@ def apply_paper_patch(psd: PSDImage, stage: Image.Image, composite: Image.Image,
     stage.paste(patched, box[:2])
 
 
+def product_silhouette(psd: PSDImage, group_name: str, product_name: str,
+                       box: Box) -> Image.Image:
+    """Coverage (L) of a prize's product sub-group, stroke and tag included.
+
+    Rendered from the pixels Photoshop stored: under force=True psd-tools traces
+    the vial's stroke from its vector mask, a clipping quadrilateral, rather
+    than from the vial, which cuts the vial's side and leaves gaps.
+    """
+    product = find_layer(psd, (group_name, product_name))
+    return render(product, box, f"{group_name}/{product_name}", force=False).getchannel("A")
+
+
+def product_shadow(silhouette: Image.Image) -> np.ndarray:
+    """Alpha (0-1, height x width x 1) of the drop shadow the product casts."""
+    width, height = silhouette.size
+    moved = Image.new("L", silhouette.size, 0)
+    moved.paste(silhouette.crop((0, 0, width, height - PRODUCT_SHADOW_OFFSET)),
+                (0, PRODUCT_SHADOW_OFFSET))
+    matte = np.asarray(moved.filter(ImageFilter.GaussianBlur(PRODUCT_SHADOW_SIGMA)),
+                       dtype=np.float64) / 255
+    return (PRODUCT_SHADOW_OPACITY * np.minimum(matte * PRODUCT_SHADOW_GAIN, 1.0))[..., None]
+
+
+def prize_won_overlay(psd: PSDImage, composite: Image.Image, group_name: str,
+                      product_name: str, box: Box) -> Image.Image:
+    """A prize box in its won state, with the product as Photoshop drew it.
+
+    The won-state group is rendered without its product, the product's drop
+    shadow is painted onto it, and the result goes over the composite crop. The
+    composite's own product pixels are then pasted through the product's exact
+    silhouette, so none of the normal state's white fill comes with them.
+    """
+    active = find_layer(psd, (f"{group_name} active",))
+    active_product = find_layer(active, (product_name,))
+    was_visible = active_product.visible
+    active_product.visible = False
+    won = np.asarray(render(active, box, f"{group_name} active"), dtype=np.float64)
+    active_product.visible = was_visible
+
+    silhouette = product_silhouette(psd, group_name, product_name, box)
+    shadow = product_shadow(silhouette)
+    won[..., :3] = won[..., :3] * (1 - shadow) + np.array(PRODUCT_SHADOW_COLOUR) * shadow
+    won_image = Image.fromarray(np.rint(won).astype(np.uint8), "RGBA")
+
+    crop = composite.crop(box)
+    image = Image.composite(crop, overlay(composite, box, won_image), silhouette)
+    check_product(f"{group_name} active", image, crop, silhouette)
+    return image
+
+
+def check_product(label: str, image: Image.Image, composite_crop: Image.Image,
+                  silhouette: Image.Image) -> None:
+    """Inside the product's silhouette, shrunk a little, the overlay is the composite."""
+    covered = silhouette.point(lambda v: 255 if v else 0)
+    inner = np.asarray(covered.filter(ImageFilter.MinFilter(2 * PRODUCT_SHRINK + 1))) > 0
+    if not inner.any():
+        raise ExtractError(f"{label}: the product silhouette shrunk by {PRODUCT_SHRINK}px is empty")
+    ours = np.asarray(image.convert("RGB"), dtype=np.float64)[inner]
+    theirs = np.asarray(composite_crop.convert("RGB"), dtype=np.float64)[inner]
+    diff = np.abs(ours - theirs).mean(axis=0)
+    values = ", ".join(f"{c}={d:.2f}" for c, d in zip("RGB", diff))
+    if diff.max() > PRODUCT_MAX_MEAN_DIFF:
+        raise ExtractError(
+            f"{label}: inside the product silhouette shrunk by {PRODUCT_SHRINK}px "
+            f"({int(inner.sum())} px) the overlay differs from the composite by mean {values} "
+            f"(limit {PRODUCT_MAX_MEAN_DIFF} per channel)"
+        )
+    print(f"{label}: product silhouette shrunk by {PRODUCT_SHRINK}px ({int(inner.sum())} px), "
+          f"mean diff from the composite {values}")
+
+
 class Writer:
     """Saves images, checks their pixel size and records what was written."""
 
     def __init__(self) -> None:
         self.written: list[tuple[Path, tuple[int, int], int]] = []
 
-    def save(self, image: Image.Image, path: Path, expected_size: tuple[int, int]) -> int:
+    def save(self, image: Image.Image, path: Path, expected_size: tuple[int, int],
+             options: dict | None = None) -> int:
         if image.size != expected_size:
             raise ExtractError(f"{path.name}: size {image.size}, expected {expected_size}")
         path.parent.mkdir(parents=True, exist_ok=True)
-        options = WEBP_OPTIONS if path.suffix == ".webp" else PNG_OPTIONS
+        if options is None:
+            options = WEBP_OPTIONS if path.suffix == ".webp" else PNG_OPTIONS
         image.save(path, **options)
         size = path.stat().st_size
         self.written.append((path, image.size, size))
@@ -216,14 +316,14 @@ def extract(psd_path: Path, out_dir: Path, icons_dir: Path, refs_dir: Path) -> N
     if stage_bytes > STAGE_BG_MAX_BYTES:
         raise ExtractError(f"stage-bg.webp is {stage_bytes:,} bytes, limit {STAGE_BG_MAX_BYTES:,}")
 
-    # 5. Hidden groups drawn over the untouched composite.
-    for group_name, box, path in [
-        ("Box_1 active", BOX1_ACTIVE, out_dir / "box1-active.webp"),
-        ("Box_2 active", BOX2_ACTIVE, out_dir / "box2-active.webp"),
-        ("เวลา", TIMER_NORMAL, refs_dir / "timer-normal.png"),
-    ]:
-        group = render(find_layer(psd, (group_name,)), box, group_name)
-        writer.save(overlay(composite, box, group), path, size_of(box))
+    # 5. Hidden groups drawn over the untouched composite: the prizes won, then
+    #    the timer with time left.
+    for group_name, product_name, box, file_name in PRIZES:
+        image = prize_won_overlay(psd, composite, group_name, product_name, box)
+        writer.save(image, out_dir / file_name, size_of(box), OVERLAY_WEBP_OPTIONS)
+    timer = render(find_layer(psd, ("เวลา",)), TIMER_NORMAL, "เวลา")
+    writer.save(overlay(composite, TIMER_NORMAL, timer), refs_dir / "timer-normal.png",
+                size_of(TIMER_NORMAL))
 
     # 6. Transparent sprites.
     restart = find_layer(psd, ("BT เริ่มเกมส์ใหม่", "Vector Smart Object"))
