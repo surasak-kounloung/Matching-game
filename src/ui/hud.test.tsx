@@ -38,3 +38,13 @@ it('ActionButton is labelled by mode and reports a press', () => {
   rerender(<ActionButton mode="restart" onPress={onPress} />);
   expect(screen.getByRole('button', { name: 'เริ่มเกมใหม่' })).toBeInTheDocument();
 });
+it('ActionButton shows one line and no icon to start, two lines and the icon to restart', () => {
+  const { container, rerender } = render(<ActionButton mode="start" onPress={() => {}} />);
+  const lines = () =>
+    Array.from(container.querySelectorAll('.action-button__line')).map((el) => el.textContent);
+  expect(lines()).toEqual(['เริ่มเกม']);
+  expect(container.querySelector('.action-button__icon')).toBeNull();
+  rerender(<ActionButton mode="restart" onPress={() => {}} />);
+  expect(lines()).toEqual(['เริ่มเกม', 'ใหม่']);
+  expect(container.querySelector('.action-button__icon')).not.toBeNull();
+});

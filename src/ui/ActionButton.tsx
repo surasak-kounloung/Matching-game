@@ -12,15 +12,8 @@ export function ActionButton({ mode, onPress }: { mode: 'start' | 'restart'; onP
     >
       {restart && <span className="action-button__icon" aria-hidden="true" />}
       <span className="action-button__label" aria-hidden="true">
-        {restart ? (
-          <>
-            เริ่มเกม
-            <br />
-            ใหม่
-          </>
-        ) : (
-          'เริ่มเกม'
-        )}
+        <span className="action-button__line">เริ่มเกม</span>
+        {restart && <span className="action-button__line">ใหม่</span>}
       </span>
     </button>
   );
