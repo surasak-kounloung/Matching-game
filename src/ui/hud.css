@@ -1,0 +1,107 @@
+/* Positions are the PSD text boxes minus the owning box's left/top. */
+.prize-active {
+  position: absolute;
+  display: block;
+  pointer-events: none;
+  user-select: none;
+}
+
+.hud-box {
+  position: absolute;
+  box-sizing: border-box;
+  background: var(--box-fill);
+  border: var(--box-border);
+  border-radius: 39.5px;
+  box-shadow: var(--box-shadow);
+}
+.hud-box[data-expired='true'] {
+  background: var(--timer-expired-fill);
+  border: var(--timer-expired-border);
+}
+
+.hud-label,
+.hud-number,
+.timer__unit {
+  position: absolute;
+  display: block;
+  text-align: center;
+  white-space: nowrap;
+  text-shadow: var(--text-glow);
+}
+.hud-label {
+  font-size: 42.2px;
+  color: var(--ink);
+}
+.hud-number {
+  font-size: 104.8px;
+  color: var(--blue);
+}
+
+/* Border is 3px, so positions inside are relative to the padding box: subtract 3 more. */
+.counter__label { left: 100px; top: 15px; width: 121px; height: 53px; line-height: 53px; }
+.counter__value { left: 61px; top: 69px; width: 183px; height: 98px; line-height: 98px; }
+
+.timer__label { left: 96px; top: 19px; width: 165px; height: 35px; line-height: 35px; }
+.timer__row {
+  position: absolute;
+  left: 23px;
+  top: 78px;
+  width: 303px;
+  height: 77px;
+  display: flex;
+  justify-content: center;
+  align-items: baseline;
+  gap: 12px;
+  white-space: nowrap;
+}
+.timer__row .hud-number,
+.timer__row .timer__unit {
+  position: static;
+  line-height: 77px;
+}
+.timer__unit {
+  font-size: 65px;
+  color: var(--ink);
+}
+.timer[data-expired='true'] .timer__value {
+  color: var(--red);
+}
+
+.action-button {
+  position: absolute;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 38px;
+  background: var(--button-fill);
+  box-shadow: var(--button-bevel), var(--button-shadow);
+  color: #ffffff;
+  font: inherit;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+.action-button__label {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  white-space: nowrap;
+  font-size: 51.2px;
+  line-height: 56px;
+  text-shadow: var(--button-label-shadow);
+}
+.action-button--start .action-button__label { inset: 0; }
+.action-button--restart .action-button__label { left: 92px; top: 15px; width: 147px; height: 113px; }
+.action-button__icon {
+  position: absolute;
+  left: 19px;
+  top: 41px;
+  width: 59px;
+  height: 63px;
+  background: #ffffff;
+  -webkit-mask: url('../assets/img/icon-restart.png') center / 100% 100% no-repeat;
+  mask: url('../assets/img/icon-restart.png') center / 100% 100% no-repeat;
+}
