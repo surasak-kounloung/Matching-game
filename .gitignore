@@ -5,7 +5,7 @@ env/
 ENV/
 
 # ===== Design =====
-AW_เกมจับคู่.psd
+*.psd
 
 # ===== Node / build =====
 node_modules/

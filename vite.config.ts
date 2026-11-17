@@ -18,6 +18,7 @@ export default defineConfig({
       },
       manifest: {
         name: 'V Square Clinic เกมจับคู่',
+        description: 'เกมจับคู่ตัวเลขของ V Square Clinic สำหรับเล่นบนจอสัมผัสที่บูธงานอีเวนต์',
         short_name: 'เกมจับคู่',
         lang: 'th',
         display: 'fullscreen',

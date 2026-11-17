@@ -1,10 +1,7 @@
 {
   "name": "vsq-matching-game",
   "version": "1.0.0",
-  "description": "��#\u0000 \u0000M\u0000a\u0000t\u0000c\u0000h\u0000i\u0000n\u0000g\u0000-\u0000g\u0000a\u0000m\u0000e\u0000\r\u0000 \u0000",
-  "directories": {
-    "doc": "docs"
-  },
+  "description": "Number-matching game for V Square Clinic, a single-page React app that runs offline on a touch-screen kiosk",
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
@@ -12,16 +9,14 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
-    "e2e": "playwright test",
+    "e2e": "playwright test e2e/offline.spec.ts",
     "visual": "playwright test e2e/visual.spec.ts && .venv\\Scripts\\python.exe tools/compare_screens.py"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/surasak-kounloung/Matching-game.git"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "license": "UNLICENSED",
   "type": "module",
   "bugs": {
     "url": "https://github.com/surasak-kounloung/Matching-game/issues"
