@@ -7,6 +7,21 @@ body,
   overflow: hidden;
 }
 
+html,
+body {
+  overscroll-behavior: none;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  cursor: default;
+}
+
+img {
+  -webkit-user-drag: none;
+  pointer-events: none;
+}
+
 .stage {
   position: absolute;
   left: 0;

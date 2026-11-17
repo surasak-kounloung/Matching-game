@@ -5,9 +5,13 @@ import './ui/tokens.css';
 import './ui/base.css';
 import { App } from './App';
 import { loadFonts } from './ui/fonts';
+import { installKioskGuards, keepScreenAwake } from './ui/kiosk';
+
+installKioskGuards();
+keepScreenAwake();
 
 loadFonts()
-  .catch(() => undefined)
+  .catch((error: unknown) => console.error('font load failed', error))
   .finally(() => {
     createRoot(document.getElementById('root')!).render(
       <StrictMode>
