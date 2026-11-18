@@ -1,0 +1,245 @@
+/*
+ * The settings screens for booth staff. They are not in the artwork, so they borrow the
+ * popup's shape and the game's colours. All sizes are stage pixels (the stage is 1497 wide);
+ * every button is at least 110 px so a finger hits it easily.
+ */
+
+/* Invisible: staff hold the title here to open the settings. */
+.settings-hotspot {
+  position: absolute;
+  touch-action: none;
+}
+
+/* Like the countdown, the dark screen reaches far past the stage on every side, so it also
+   covers the bars of a screen that is not exactly 9:16, and its centre is the stage's centre.
+   It sits above everything, the countdown included, and takes every touch. */
+.admin {
+  position: absolute;
+  inset: -4000px;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--admin-backdrop);
+  color: var(--ink);
+  touch-action: none;
+}
+
+.admin button {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.admin__card {
+  box-sizing: border-box;
+  padding: 64px 80px 80px;
+  background: var(--popup-fill);
+  border: var(--popup-border);
+  border-radius: 90px;
+  box-shadow: var(--popup-shadow);
+}
+.admin__title {
+  margin: 0;
+  font-size: 84px;
+  font-weight: inherit;
+  line-height: 110px;
+  text-align: center;
+  white-space: nowrap;
+  color: var(--blue);
+}
+
+/* ---------- PIN pad ---------- */
+
+.pin-pad {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 980px;
+}
+.pin-pad__dots {
+  display: flex;
+  gap: 44px;
+  margin-top: 44px;
+}
+.pin-pad__dot {
+  box-sizing: border-box;
+  width: 60px;
+  height: 60px;
+  border: 7px solid var(--blue);
+  border-radius: 50%;
+}
+.pin-pad__dot[data-on='true'] {
+  background: var(--blue);
+}
+.pin-pad__message {
+  margin: 30px 0 0;
+  min-height: 64px; /* kept when empty, so the keys do not jump when a message appears */
+  font-size: 46px;
+  line-height: 64px;
+  text-align: center;
+  white-space: nowrap;
+  color: var(--red);
+}
+.pin-pad__keys {
+  display: grid;
+  grid-template-columns: repeat(3, 240px);
+  gap: 28px;
+  margin-top: 30px;
+}
+.admin-key {
+  height: 170px;
+  border: 4px solid var(--admin-key-border);
+  border-radius: 40px;
+  background: var(--admin-key-fill);
+  color: var(--ink);
+  font-size: 92px;
+  line-height: 1;
+}
+.admin-key--word {
+  border-color: transparent;
+  background: transparent;
+  font-size: 52px;
+}
+.admin-key:active {
+  background: var(--admin-key-pressed);
+}
+
+/* ---------- settings panel ---------- */
+
+.settings-panel {
+  width: 1380px;
+}
+.settings-panel__lead {
+  margin: 6px 0 0;
+  font-size: 42px;
+  line-height: 60px;
+  text-align: center;
+  color: var(--admin-muted);
+}
+.settings-panel__line {
+  margin: 30px 0 0;
+  padding: 18px 30px;
+  border-radius: 26px;
+  font-size: 42px;
+  line-height: 58px;
+  text-align: center;
+}
+.settings-panel__line--warning {
+  background: var(--timer-expired-fill);
+  color: var(--red);
+}
+.settings-panel__line--notice {
+  background: var(--card-matched-fill);
+  color: var(--green);
+}
+.settings-panel__rows {
+  display: flex;
+  flex-direction: column;
+  gap: 38px;
+  margin: 56px 0 70px;
+}
+
+.setting {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+.setting__text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.setting__label {
+  font-size: 50px;
+  line-height: 68px;
+  white-space: nowrap;
+}
+.setting__hint {
+  font-size: 34px;
+  line-height: 46px;
+  white-space: nowrap;
+  color: var(--admin-muted);
+}
+.setting__stepper {
+  display: grid;
+  grid-template-columns: 116px 116px 180px 116px 116px;
+  gap: 14px;
+  align-items: center;
+  flex: none;
+}
+.admin-step {
+  height: 116px;
+  border: 0;
+  border-radius: 30px;
+  background: var(--button-fill);
+  color: #ffffff;
+  font-size: 72px;
+  line-height: 1;
+}
+.admin-step--big {
+  border: 5px solid var(--button-fill);
+  background: #ffffff;
+  color: var(--button-fill);
+  font-size: 48px;
+}
+.admin-step:disabled {
+  opacity: 0.28;
+  cursor: default;
+}
+.admin-step:active:not(:disabled) {
+  filter: brightness(0.9);
+}
+.setting__value {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.setting__number {
+  font-size: 84px;
+  line-height: 84px;
+  color: var(--blue);
+}
+.setting__unit {
+  font-size: 30px;
+  line-height: 38px;
+  color: var(--admin-muted);
+}
+
+.settings-panel__buttons {
+  display: flex;
+  gap: 30px;
+  margin-top: 30px;
+}
+.admin-button {
+  flex: 1 1 0;
+  height: 136px;
+  border-radius: 40px;
+  font-size: 56px;
+  line-height: 1;
+}
+.admin-button--primary {
+  border: 0;
+  background: var(--button-fill);
+  color: #ffffff;
+}
+.admin-button--plain {
+  border: 5px solid var(--button-fill);
+  background: #ffffff;
+  color: var(--button-fill);
+}
+.admin-button--quiet {
+  height: 110px;
+  border: 4px solid var(--admin-key-border);
+  background: var(--admin-key-fill);
+  color: var(--ink);
+  font-size: 44px;
+}
+.admin-button:active {
+  filter: brightness(0.92);
+}

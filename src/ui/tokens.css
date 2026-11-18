@@ -52,4 +52,11 @@
   /* the dark screen and its text during the countdown before a round */
   --overlay-fill: rgba(0, 0, 0, 0.6);
   --countdown-ink: #ffffff;
+
+  /* the settings screens are not in the artwork: they reuse the popup's shape and the game's colours */
+  --admin-backdrop: rgba(0, 0, 0, 0.72);
+  --admin-key-fill: #eef4ff;
+  --admin-key-border: #c5d8fb;
+  --admin-key-pressed: #cedefb;
+  --admin-muted: #7183b5;
 }

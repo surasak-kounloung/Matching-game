@@ -14,6 +14,12 @@ export const TIMER_BOX: Rect = { left: 596, top: 1006, width: 361, height: 186 }
 export const ACTION_BUTTON: Rect = { left: 983, top: 1019, width: 261, height: 151 };
 export const PRIZE1_ACTIVE: Rect = { left: 90, top: 630, width: 662, height: 302 };
 export const PRIZE2_ACTIVE: Rect = { left: 745, top: 630, width: 745, height: 362 };
+/**
+ * Where staff press and hold to open the settings: the title text "V Square Clinic"
+ * (405,147) 688×81 in the PSD, grown by 50 px left and right and 40 px above and below.
+ * Nothing is drawn there.
+ */
+export const TITLE_HOTSPOT: Rect = { left: 355, top: 107, width: 788, height: 161 };
 export const POPUP: Rect = { left: 192, top: 1638, width: 1116, height: 612 };
 export const POPUP_BUTTON: Rect = { left: 537, top: 2073, width: 426, height: 103 };
 /** Rectangle of the image popup-clock.png (includes its 6 px white border). */
