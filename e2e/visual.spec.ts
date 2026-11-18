@@ -1,6 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
 import { gameConfig } from '../src/config/gameConfig';
-import { matchPairs, openGame, openMismatch, STAGE_VIEWPORT } from './helpers';
+import { matchPairs, openGame, openMismatch, STAGE_VIEWPORT, startRound } from './helpers';
 
 /**
  * Screenshots for tools/compare_screens.py, saved to e2e/screens/ (git-ignored).
@@ -12,15 +12,27 @@ async function shoot(page: Page, name: string): Promise<void> {
   await page.screenshot({ path: `${test.info().project.testDir}/screens/${name}.png`, animations: 'disabled' });
 }
 
-async function start(page: Page): Promise<void> {
-  await page.getByRole('button', { name: 'เริ่มเกม', exact: true }).click();
-}
+const start = startRound;
 
 test.use({ viewport: STAGE_VIEWPORT });
 
 test('ready', async ({ page }) => {
   await openGame(page);
   await shoot(page, 'ready');
+});
+
+// There is no reference artwork for the countdown; these two are for a person to look at.
+test('countdown before the round: a number, then the cue', async ({ page }) => {
+  test.skip(gameConfig.countdownMs + gameConfig.startCueMs === 0, 'the countdown is turned off in gameConfig');
+  await openGame(page);
+  await page.getByRole('button', { name: 'เริ่มเกม', exact: true }).click();
+  await expect(page.getByTestId('countdown')).toBeVisible();
+  await shoot(page, 'countdown-number');
+  if (gameConfig.countdownMs > 0 && gameConfig.startCueMs > 0) {
+    await page.clock.fastForward(gameConfig.countdownMs);
+    await expect(page.getByTestId('countdown')).toHaveText('เริ่ม!');
+    await shoot(page, 'countdown-cue');
+  }
 });
 
 test('playing with a mismatched pair open', async ({ page }) => {

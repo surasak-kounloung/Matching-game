@@ -1,6 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
 import { gameConfig } from '../src/config/gameConfig';
-import { openGame, openMismatch } from './helpers';
+import { openGame, openMismatch, startRound } from './helpers';
 
 /**
  * One look at all 42 cards, from computed styles:
@@ -32,7 +32,7 @@ function look(page: Page) {
 
 test('pressing เริ่มเกมใหม่ after a round never shows or turns a card face before the next round', async ({ page }) => {
   await openGame(page);
-  await page.getByRole('button', { name: 'เริ่มเกม', exact: true }).click();
+  await startRound(page);
   await page.clock.fastForward(gameConfig.timeLimitMs);
   const dialog = page.getByRole('dialog', { name: 'หมดเวลาแล้ว!' });
   await expect(dialog).toBeVisible();
@@ -55,7 +55,7 @@ test('pressing เริ่มเกมใหม่ after a round never shows or
 test('cards still turn with their animation during play, on a missed pair and at the end of a round', async ({ page }) => {
   const settled = () => expect.poll(async () => (await look(page)).flipping).toBe(0);
   await openGame(page);
-  await page.getByRole('button', { name: 'เริ่มเกม', exact: true }).click();
+  await startRound(page);
 
   await openMismatch(page);
   expect((await look(page)).flipping).toBe(2);

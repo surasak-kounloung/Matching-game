@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 import { gameConfig } from '../src/config/gameConfig';
-import { matchPairs, openGame, pauseClock } from './helpers';
+import { matchPairs, openGame, pauseClock, startRound } from './helpers';
 
 test('plays a full round with the network off after one online visit', async ({ page, context }) => {
   await openGame(page);
@@ -24,7 +24,7 @@ test('plays a full round with the network off after one online visit', async ({ 
     return (await fetch(url)).ok;
   }, stageBg)).toBe(true);
 
-  await page.getByRole('button', { name: 'เริ่มเกม', exact: true }).click();
+  await startRound(page);
   await matchPairs(page, 4);
   await expect(page.getByTestId('counter-value')).toHaveText('4/7');
   await expect(page.getByTestId('prize1-active')).toBeVisible();
@@ -44,7 +44,7 @@ test('makes no request to any other host', async ({ page }) => {
   const foreign: string[] = [];
   page.on('request', (r) => { if (!r.url().startsWith('http://localhost:4173')) foreign.push(r.url()); });
   await openGame(page);
-  await page.getByRole('button', { name: 'เริ่มเกม', exact: true }).click();
+  await startRound(page);
   await page.clock.fastForward(gameConfig.timeLimitMs + gameConfig.restartLockMs);
   expect(foreign).toEqual([]);
 });

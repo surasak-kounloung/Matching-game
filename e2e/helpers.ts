@@ -1,4 +1,5 @@
 import type { Page } from '@playwright/test';
+import { gameConfig } from '../src/config/gameConfig';
 
 export const STAGE_VIEWPORT = { width: 1497, height: 2664 } as const;
 
@@ -17,6 +18,14 @@ export async function openGame(page: Page): Promise<void> {
   await page.evaluate(() => document.fonts.ready);
   await page.getByRole('button', { name: 'เริ่มเกม', exact: true }).waitFor({ state: 'visible' });
   await pauseClock(page);
+}
+
+/** Presses "เริ่มเกม" and moves time past the countdown, until the dark screen is gone and the round is running. */
+export async function startRound(page: Page): Promise<void> {
+  await page.getByRole('button', { name: 'เริ่มเกม', exact: true }).click();
+  const lead = gameConfig.countdownMs + gameConfig.startCueMs;
+  if (lead > 0) await page.clock.fastForward(lead);
+  await page.getByTestId('countdown').waitFor({ state: 'detached' });
 }
 
 async function downCards(page: Page): Promise<{ id: string; value: string }[]> {
