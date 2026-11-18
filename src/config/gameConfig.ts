@@ -16,7 +16,7 @@ export interface GameConfig {
 
 export const gameConfig: GameConfig = {
   // Adjustable values (spec 7.3): safe to tune without touching the design.
-  timeLimitMs: 20_000,
+  timeLimitMs: 25_000,
   mismatchMs: 500,
   restartLockMs: 1_000,
   startLockMs: 500,
