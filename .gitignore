@@ -17,6 +17,7 @@ e2e/screens/
 
 # ===== ฟอนต์มีลิขสิทธิ์ ห้ามขึ้น repository สาธารณะ =====
 fonts/
+design/
 
 # ===== เอกสารภายในและภาพอ้างอิง ไม่ขึ้น repository สาธารณะ =====
 docs/superpowers/
