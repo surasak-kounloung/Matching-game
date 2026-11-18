@@ -14,11 +14,11 @@
 ```bash
 npm install          # ติดตั้งแพ็กเกจ
 npm run dev          # เปิดเซิร์ฟเวอร์สำหรับพัฒนา
-npm test             # ชุดทดสอบ Vitest (91 ข้อ)
+npm test             # ชุดทดสอบ Vitest
 npm run typecheck    # ตรวจชนิดข้อมูลด้วย TypeScript
 npm run build        # สร้างเกมที่พร้อมนำขึ้นใช้งานในโฟลเดอร์ dist/
 npm run preview      # เปิดดูเกมที่ build แล้ว
-npm run e2e          # ทดสอบ Playwright: เล่นได้ขณะออฟไลน์ (offline.spec.ts) และรีเซ็ตแล้วไม่เห็นตัวเลขของรอบใหม่ (reset.spec.ts)
+npm run e2e          # ทดสอบ Playwright: เล่นได้ขณะออฟไลน์ (offline.spec.ts) รีเซ็ตแล้วไม่เห็นตัวเลขของรอบใหม่ (reset.spec.ts) และฉากนับถอยหลังบังการแตะ (countdown.spec.ts)
 npm run visual       # ถ่ายภาพหน้าจอ แล้วเทียบกับภาพอ้างอิงของงานออกแบบ
 ```
 
