@@ -145,6 +145,79 @@ test('the settings reach the edges of a screen that is wider than 9:16, and the 
   }
 });
 
+// Real touch input, sent through the browser's own touch pipeline. A touch behaves unlike a
+// mouse in two ways that matter here: it keeps reporting to the element it started on after
+// sliding off it, and a tap by a second finger produces no click.
+test.describe('with fingers on a touch screen', () => {
+  test.use({ hasTouch: true });
+
+  type Finger = { id: number; x: number; y: number };
+  async function touchScreen(page: Page) {
+    const session = await page.context().newCDPSession(page);
+    /** Sends the fingers now on the glass; an empty list lifts them all. */
+    return (type: 'touchStart' | 'touchMove' | 'touchEnd', fingers: Finger[]) =>
+      session.send('Input.dispatchTouchEvent', {
+        type,
+        touchPoints: fingers.map((f) => ({ id: f.id, x: Math.round(f.x), y: Math.round(f.y) })),
+      });
+  }
+
+  test('a still finger opens the settings after 3 seconds, and lifting it early does not', async ({ page }) => {
+    await openGame(page);
+    const touch = await touchScreen(page);
+    const admin = page.getByTestId('admin');
+    const [x, y] = await titlePoint(page);
+
+    await touch('touchStart', [{ id: 1, x, y }]);
+    await page.clock.fastForward(1_000);
+    await touch('touchEnd', []);
+    await page.clock.fastForward(3_000);
+    await expect(admin).toHaveCount(0);
+
+    await touch('touchStart', [{ id: 1, x, y }]);
+    await page.clock.fastForward(1_500);
+    await touch('touchMove', [{ id: 1, x: x + 6, y: y + 4 }]); // a finger never rests perfectly still
+    await page.clock.fastForward(1_400);
+    await expect(admin).toHaveCount(0);
+    await page.clock.fastForward(100);
+    await expect(admin.getByRole('heading')).toHaveText('ตั้งรหัส PIN 4 หลัก');
+    await touch('touchEnd', []);
+    await expect(admin).toHaveCount(1);
+  });
+
+  test('a finger that slides off the title does not open the settings', async ({ page }) => {
+    await openGame(page);
+    const touch = await touchScreen(page);
+    const [x, y] = await titlePoint(page);
+
+    await touch('touchStart', [{ id: 1, x, y }]);
+    await page.clock.fastForward(1_000);
+    await touch('touchMove', [{ id: 1, x, y: y + 600 }]);
+    await page.clock.fastForward(3_000);
+    await expect(page.getByTestId('admin')).toHaveCount(0);
+    await touch('touchEnd', []);
+    await page.clock.fastForward(3_000);
+    await expect(page.getByTestId('admin')).toHaveCount(0);
+  });
+
+  test('a second finger on the screen during the hold does not open the settings', async ({ page }) => {
+    await openGame(page);
+    const touch = await touchScreen(page);
+    const [x, y] = await titlePoint(page);
+    const [sx, sy] = centre((await page.getByRole('button', { name: 'เริ่มเกม', exact: true }).boundingBox())!);
+
+    await touch('touchStart', [{ id: 1, x, y }]);
+    await page.clock.fastForward(1_000);
+    // the second finger lands on the start button while the first stays on the title
+    await touch('touchStart', [{ id: 1, x, y }, { id: 2, x: sx, y: sy }]);
+    await page.clock.fastForward(3_000);
+    await expect(page.getByTestId('admin')).toHaveCount(0);
+    await touch('touchEnd', []);
+    await page.clock.fastForward(3_000);
+    await expect(page.getByTestId('admin')).toHaveCount(0);
+  });
+});
+
 test('the title does nothing during a round', async ({ page }) => {
   await openGame(page);
   const title = await titlePoint(page);

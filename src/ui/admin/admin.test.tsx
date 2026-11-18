@@ -50,6 +50,81 @@ it('hotspot: a hold after an abandoned one needs its own 3 seconds', () => {
   wait(1_500);
   expect(onOpen).toHaveBeenCalledTimes(1);
 });
+// A touch keeps sending its events to the element it started on, even after the finger has
+// left it: no pointerleave arrives until the finger lifts. So sliding off shows only as moves.
+const placeHotspot = () =>
+  vi.spyOn(hotspot(), 'getBoundingClientRect').mockReturnValue({
+    x: 100, y: 50, left: 100, top: 50, right: 500, bottom: 130, width: 400, height: 80, toJSON: () => ({}),
+  });
+const finger = (id: number, x: number, y: number) => ({ button: 0, pointerType: 'touch', pointerId: id, clientX: x, clientY: y });
+
+it('hotspot: a finger that slides off the title while still pressed stops the hold', () => {
+  const onOpen = vi.fn();
+  render(<SettingsHotspot onOpen={onOpen} />);
+  placeHotspot();
+  fireEvent.pointerDown(hotspot(), finger(1, 300, 90));
+  wait(1_000);
+  fireEvent.pointerMove(hotspot(), finger(1, 300, 400));
+  wait(3_000);
+  expect(onOpen).not.toHaveBeenCalled();
+  // sliding back onto the title does not resume it either
+  fireEvent.pointerMove(hotspot(), finger(1, 300, 90));
+  wait(3_000);
+  expect(onOpen).not.toHaveBeenCalled();
+});
+it('hotspot: a finger that trembles but stays on the title keeps the hold', () => {
+  const onOpen = vi.fn();
+  render(<SettingsHotspot onOpen={onOpen} />);
+  placeHotspot();
+  fireEvent.pointerDown(hotspot(), finger(1, 300, 90));
+  wait(1_000);
+  fireEvent.pointerMove(hotspot(), finger(1, 306, 94));
+  wait(1_000);
+  fireEvent.pointerMove(hotspot(), finger(1, 100, 50)); // the very corner still counts
+  fireEvent.pointerMove(hotspot(), finger(1, 500, 130));
+  wait(999);
+  expect(onOpen).not.toHaveBeenCalled();
+  wait(1);
+  expect(onOpen).toHaveBeenCalledTimes(1);
+});
+it('hotspot: another finger touching anywhere on the screen stops the hold', () => {
+  const onOpen = vi.fn();
+  render(
+    <>
+      <SettingsHotspot onOpen={onOpen} />
+      <button type="button">elsewhere</button>
+    </>,
+  );
+  fireEvent.pointerDown(hotspot(), finger(1, 300, 90));
+  wait(1_000);
+  fireEvent.pointerDown(screen.getByRole('button', { name: 'elsewhere' }), finger(2, 900, 900));
+  wait(3_000);
+  expect(onOpen).not.toHaveBeenCalled();
+  // with every finger lifted, a fresh hold works again
+  fireEvent.pointerUp(hotspot(), finger(1, 300, 90));
+  fireEvent.pointerDown(hotspot(), finger(1, 300, 90));
+  wait(3_000);
+  expect(onOpen).toHaveBeenCalledTimes(1);
+});
+it('hotspot: stops watching the rest of the screen when the hold ends', () => {
+  const added = vi.spyOn(document, 'addEventListener');
+  const removed = vi.spyOn(document, 'removeEventListener');
+  const watching = () =>
+    added.mock.calls.filter(([type]) => type === 'pointerdown').length -
+    removed.mock.calls.filter(([type]) => type === 'pointerdown').length;
+  const { unmount } = render(<SettingsHotspot onOpen={() => {}} />);
+  const before = watching();
+  fireEvent.pointerDown(hotspot(), finger(1, 300, 90));
+  expect(watching()).toBe(before + 1);
+  fireEvent.pointerUp(hotspot(), finger(1, 300, 90));
+  expect(watching()).toBe(before);
+  fireEvent.pointerDown(hotspot(), finger(1, 300, 90));
+  wait(3_000); // the hold completes
+  expect(watching()).toBe(before);
+  fireEvent.pointerDown(hotspot(), finger(1, 300, 90));
+  unmount();
+  expect(watching()).toBe(before);
+});
 it('hotspot: ignores other mouse buttons', () => {
   const onOpen = vi.fn();
   render(<SettingsHotspot onOpen={onOpen} />);
