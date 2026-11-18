@@ -2,14 +2,14 @@ import { fireEvent, render, screen, within } from '@testing-library/react';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { App } from './App';
 import { createTestClock, mulberry32 } from './test/clock';
-import { testConfig } from './test/testConfig';
+import { countdownTestConfig, testConfig } from './test/testConfig';
 
 beforeEach(() => vi.useFakeTimers());
 afterEach(() => vi.useRealTimers());
 
-const setup = () => {
+const setup = (config = testConfig) => {
   const clock = createTestClock();
-  const { container } = render(<App config={testConfig} deps={{ now: clock.now, rng: mulberry32(7) }} />);
+  const { container } = render(<App config={config} deps={{ now: clock.now, rng: mulberry32(7) }} />);
   const all = () => Array.from(container.querySelectorAll<HTMLElement>('[data-card]'));
   const withValue = (v: string) => all().filter((el) => el.querySelector('.card__front')?.textContent === v);
   const tap = (el: HTMLElement) => fireEvent.pointerDown(el, { button: 0, pointerType: 'touch' });
@@ -142,4 +142,44 @@ it('9. a double tap on start does not cancel the round it starts', () => {
   press('เริ่มเกมใหม่');            // หลัง 500 ms การกด "เริ่มเกมใหม่" รีเซ็ตได้ตามปกติ
   expect(screen.getByRole('button', { name: 'เริ่มเกม' })).toBeInTheDocument();
   expect(value('timer-value')).toBe('20');
+});
+it('10. pressing start shows the dark screen with 3, 2, 1, เริ่ม!, then the round begins', () => {
+  const { clock, press, concealed } = setup(countdownTestConfig);
+  expect(screen.queryByTestId('countdown')).toBeNull();
+  press('เริ่มเกม');
+  expect(screen.getByTestId('countdown')).toHaveTextContent('3');
+  expect(value('timer-value')).toBe('20');
+  expect(concealed()).not.toBeNull();
+  clock.advance(1_000);
+  expect(screen.getByTestId('countdown')).toHaveTextContent('2');
+  clock.advance(1_000);
+  expect(screen.getByTestId('countdown')).toHaveTextContent('1');
+  clock.advance(1_000);
+  expect(screen.getByTestId('countdown')).toHaveTextContent('เริ่ม!');
+  clock.advance(700);
+  expect(screen.queryByTestId('countdown')).toBeNull();
+  expect(concealed()).toBeNull();
+  expect(value('timer-value')).toBe('20');
+  clock.advance(1_000);
+  expect(value('timer-value')).toBe('19');
+});
+it('11. nothing can be played or cancelled during the countdown', () => {
+  const { clock, all, tap, press } = setup(countdownTestConfig);
+  press('เริ่มเกม');
+  clock.advance(1_200);
+  tap(all()[0]!);
+  expect(all()[0]!.dataset.face).toBe('down');
+  press('เริ่มเกมใหม่'); // the bar button sits under the dark screen; a mouse or keyboard could still reach it
+  expect(screen.getByTestId('countdown')).toHaveTextContent('2');
+  clock.advance(2_500);
+  expect(screen.queryByTestId('countdown')).toBeNull();
+  clock.advance(1_000);
+  expect(value('timer-value')).toBe('19');
+});
+it('12. with the countdown turned off, the round starts at once and no dark screen appears', () => {
+  const { clock, press } = setup();
+  press('เริ่มเกม');
+  expect(screen.queryByTestId('countdown')).toBeNull();
+  clock.advance(1_000);
+  expect(value('timer-value')).toBe('19');
 });

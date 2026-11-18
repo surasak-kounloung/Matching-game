@@ -5,10 +5,15 @@ import { createDeck } from './deck';
 import type { Rng } from './deck';
 import { gameReducer, initialState } from './gameReducer';
 import type { GameEvent, GameState, Phase } from './types';
-import { faceOf, prizeFlags, secondsLeft } from './view';
+import { countdownLabel, faceOf, prizeFlags, secondsLeft } from './view';
 import type { CardView } from './view';
 
 export const TICK_MS = 50;
+
+/** Everything on screen that changes with the clock alone, as one value to compare. */
+function clockDriven(state: GameState, at: number, config: GameConfig): string {
+  return `${secondsLeft(state, at, config)}|${countdownLabel(state, at, config) ?? ''}`;
+}
 
 export interface GameDeps {
   now: () => number;
@@ -20,6 +25,8 @@ export interface GameView {
   cards: readonly CardView[];
   pairs: number;
   secondsLeft: number;
+  /** '3', '2', '1' or 'เริ่ม!' while the countdown before a round runs; otherwise null. */
+  countdown: string | null;
   prize1: boolean;
   prize2: boolean;
   start: () => void;
@@ -40,24 +47,25 @@ export function useGame(config: GameConfig = gameConfig, deps: Partial<GameDeps>
     undefined,
     () => initialState(createDeck(config, rng)),
   );
-  // Only used to re-render when the displayed second changes; the value is derived at render time.
-  const [, setShownSeconds] = useState(() => secondsLeft(state, now(), config));
+  // Only used to re-render when the displayed second or countdown label changes; both are
+  // derived at render time. During the countdown the game state itself does not change.
+  const [, setShown] = useState(() => clockDriven(state, now(), config));
 
   const stateRef = useRef(state);
   useEffect(() => {
     stateRef.current = state;
   }, [state]);
 
-  const playing = state.phase === 'playing';
+  const running = state.phase === 'countdown' || state.phase === 'playing';
   useEffect(() => {
-    if (!playing) return;
+    if (!running) return;
     const id = setInterval(() => {
       const at = now();
       dispatch({ type: 'tick', at });
-      setShownSeconds(secondsLeft(stateRef.current, at, config));
+      setShown(clockDriven(stateRef.current, at, config));
     }, TICK_MS);
     return () => clearInterval(id);
-  }, [playing, now, config]);
+  }, [running, now, config]);
 
   const start = useCallback(() => dispatch({ type: 'start', at: now() }), [now]);
   const flip = useCallback((cardId: number) => dispatch({ type: 'flip', at: now(), cardId }), [now]);
@@ -76,6 +84,7 @@ export function useGame(config: GameConfig = gameConfig, deps: Partial<GameDeps>
     cards,
     pairs: state.pairs,
     secondsLeft: secondsLeft(state, now(), config),
+    countdown: countdownLabel(state, now(), config),
     ...prizeFlags(state, config),
     start,
     flip,

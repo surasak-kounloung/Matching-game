@@ -1,0 +1,52 @@
+/*
+ * The countdown before a round. It reaches far past the stage on every side, so it also
+ * covers the bars left over on a screen that is not exactly 9:16, and its centre is still
+ * the centre of the stage. It sits above everything and takes every touch.
+ */
+.start-countdown {
+  position: absolute;
+  inset: -4000px;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--overlay-fill);
+  touch-action: none;
+  animation: start-countdown-in 150ms ease-out;
+}
+
+.start-countdown__label {
+  color: var(--countdown-ink);
+  line-height: 1;
+  white-space: nowrap;
+  text-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+  animation: start-countdown-pop 300ms ease-out;
+}
+
+.start-countdown__label[data-kind='number'] {
+  font-size: 560px;
+}
+
+.start-countdown__label[data-kind='cue'] {
+  font-size: 300px;
+}
+
+@keyframes start-countdown-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes start-countdown-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}

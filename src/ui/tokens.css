@@ -47,4 +47,8 @@
   --popup-shadow: 3.5px 5px 4px 2.5px rgba(106, 106, 106, 0.86);
   /* PSD: distance 10, size 9, choke 33%, cast by the clock without its 6px white stroke */
   --popup-clock-shadow: drop-shadow(0 7.5px 2px rgba(156, 191, 222, 0.58));
+
+  /* the dark screen and its text during the countdown before a round */
+  --overlay-fill: rgba(0, 0, 0, 0.6);
+  --countdown-ink: #ffffff;
 }
