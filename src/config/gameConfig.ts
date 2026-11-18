@@ -16,6 +16,9 @@ export interface GameConfig {
 
 export const gameConfig: GameConfig = {
   // Adjustable values (spec 7.3): safe to tune without touching the design.
+  // timeLimitMs, mismatchMs, countdownMs and startCueMs are the starting values only: staff
+  // can change them on the booth machine from the settings screen (src/settings/settings.ts
+  // has the allowed ranges), and a value saved there is used instead of the one here.
   timeLimitMs: 25_000,
   mismatchMs: 500,
   restartLockMs: 1_000,

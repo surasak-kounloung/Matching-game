@@ -1,4 +1,5 @@
 import { expect, it } from 'vitest';
+import { SETTING_FIELDS } from '../settings/settings';
 import { gameConfig as c } from './gameConfig';
 
 // Only the values drawn into the artwork are pinned. The tunable ones (time, delays,
@@ -48,4 +49,11 @@ it('has a countdown of whole seconds from 0 to 9 and a start cue of at most 2 se
   expect(c.countdownMs).toBeLessThanOrEqual(9_000);
   expect(c.startCueMs).toBeGreaterThanOrEqual(0);
   expect(c.startCueMs).toBeLessThanOrEqual(2_000);
+});
+
+it('starts inside the ranges the settings screen allows, so staff can always step back to it', () => {
+  for (const field of SETTING_FIELDS) {
+    expect(c[field.key], field.key).toBeGreaterThanOrEqual(field.min);
+    expect(c[field.key], field.key).toBeLessThanOrEqual(field.max);
+  }
 });
