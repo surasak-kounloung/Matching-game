@@ -20,6 +20,7 @@ export function secondsLeft(state: GameState, now: number, config: GameConfig = 
   const toSeconds = (ms: number) => Math.max(0, Math.ceil(ms / 1000));
   switch (state.phase) {
     case 'ready':
+    case 'countdown':
       return toSeconds(config.timeLimitMs);
     case 'playing':
       return state.deadline === null ? 0 : toSeconds(state.deadline - now);
@@ -28,6 +29,18 @@ export function secondsLeft(state: GameState, now: number, config: GameConfig = 
     case 'won':
       return state.deadline === null || state.endedAt === null ? 0 : toSeconds(state.deadline - state.endedAt);
   }
+}
+
+/**
+ * What the countdown screen shows: '3', '2', '1' for one second each, then 'เริ่ม!' for the
+ * last startCueMs before play begins. Null when no countdown is running.
+ */
+export function countdownLabel(state: GameState, now: number, config: GameConfig = gameConfig): string | null {
+  if (state.phase !== 'countdown' || state.startsAt === null) return null;
+  const untilCue = state.startsAt - now - config.startCueMs;
+  if (untilCue <= 0) return 'เริ่ม!';
+  const most = Math.max(1, Math.ceil(config.countdownMs / 1000));
+  return String(Math.min(most, Math.max(1, Math.ceil(untilCue / 1000))));
 }
 
 export function formatSeconds(seconds: number): string {

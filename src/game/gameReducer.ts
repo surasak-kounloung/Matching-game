@@ -8,6 +8,7 @@ export function initialState(deck: readonly string[], readySince: number | null 
     cards: deck.map((value, id) => ({ id, value, matched: false })),
     open: [],
     pairs: 0,
+    startsAt: null,
     deadline: null,
     mismatchUntil: null,
     endedAt: null,
@@ -15,16 +16,26 @@ export function initialState(deck: readonly string[], readySince: number | null 
   };
 }
 
-/** Applies the deadline and a pending flip-back. Returns the same object when nothing is due. */
-function catchUp(state: GameState, at: number): GameState {
-  if (state.phase !== 'playing') return state;
-  if (state.deadline !== null && at >= state.deadline) {
-    return { ...state, phase: 'timeUp', endedAt: state.deadline, open: [], mismatchUntil: null };
+/**
+ * Applies everything that is due by `at`: the end of the countdown, the deadline and a
+ * pending flip-back. Returns the same object when nothing is due.
+ */
+function catchUp(state: GameState, at: number, config: GameConfig): GameState {
+  let current = state;
+  if (current.phase === 'countdown') {
+    if (current.startsAt === null || at < current.startsAt) return current;
+    // The round runs from the moment the countdown was due to end, not from this event,
+    // so a late tick neither shortens nor lengthens it.
+    current = { ...current, phase: 'playing', deadline: current.startsAt + config.timeLimitMs, startsAt: null };
   }
-  if (state.mismatchUntil !== null && at >= state.mismatchUntil) {
-    return { ...state, open: [], mismatchUntil: null };
+  if (current.phase !== 'playing') return current;
+  if (current.deadline !== null && at >= current.deadline) {
+    return { ...current, phase: 'timeUp', endedAt: current.deadline, open: [], mismatchUntil: null };
   }
-  return state;
+  if (current.mismatchUntil !== null && at >= current.mismatchUntil) {
+    return { ...current, open: [], mismatchUntil: null };
+  }
+  return current;
 }
 
 function flipCard(state: GameState, at: number, cardId: number, config: GameConfig): GameState {
@@ -60,17 +71,21 @@ export function gameReducer(
     case 'start': {
       if (state.phase !== 'ready') return state;
       if (state.readySince !== null && event.at < state.readySince + config.startLockMs) return state;
-      return { ...state, phase: 'playing', deadline: event.at + config.timeLimitMs };
+      const lead = config.countdownMs + config.startCueMs;
+      if (lead <= 0) return { ...state, phase: 'playing', deadline: event.at + config.timeLimitMs };
+      return { ...state, phase: 'countdown', startsAt: event.at + lead };
     }
     case 'tick':
-      return catchUp(state, event.at);
+      return catchUp(state, event.at, config);
     case 'flip': {
-      const current = catchUp(state, event.at);
+      const current = catchUp(state, event.at, config);
       return flipCard(current, event.at, event.cardId, config);
     }
     case 'restart': {
       if (state.phase === 'ready') return state;
-      const current = catchUp(state, event.at);
+      const current = catchUp(state, event.at, config);
+      // The dark countdown screen covers every button; nothing cancels a countdown.
+      if (current.phase === 'countdown') return current;
       // The second tap of a double tap on start lands on the restart button that replaces it,
       // so restart is ignored for startLockMs after the round started (deadline - timeLimitMs).
       if (

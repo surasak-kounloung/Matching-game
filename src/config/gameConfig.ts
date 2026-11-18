@@ -3,6 +3,8 @@ export interface GameConfig {
   mismatchMs: number;
   restartLockMs: number;
   startLockMs: number;
+  countdownMs: number;
+  startCueMs: number;
   decoyValues: readonly string[];
   targetValue: string;
   targetPairs: number;
@@ -18,6 +20,10 @@ export const gameConfig: GameConfig = {
   mismatchMs: 500,
   restartLockMs: 1_000,
   startLockMs: 500,
+  // After "เริ่มเกม": the dark screen counts 3, 2, 1 for countdownMs, shows "เริ่ม!" for
+  // startCueMs, then the round starts. Set both to 0 to turn the countdown off.
+  countdownMs: 3_000,
+  startCueMs: 700,
   decoyValues: ['84', '88', '44', '80', '40', '41', '81'],
 
   // Tied to the design (spec 7.3): changing these requires updating the PSD too.

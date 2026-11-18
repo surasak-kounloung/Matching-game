@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { testConfig as cfg } from '../test/testConfig';
+import { countdownTestConfig as ccfg, testConfig as cfg } from '../test/testConfig';
 import { buildDeckValues } from './deck';
 import { gameReducer, initialState } from './gameReducer';
 import type { GameEvent, GameState } from './types';
@@ -135,5 +135,50 @@ describe('robustness', () => {
       s = freeze(gameReducer(s, e, cfg));
     }
     expect(s.phase).toBe('timeUp');
+  });
+});
+
+describe('countdown before the round', () => {
+  const START_AT = T0 + 3_700; // 3 s of numbers plus 0.7 s of "เริ่ม!"
+  const runC = (events: GameEvent[]) => events.reduce((s, e) => gameReducer(s, e, ccfg), initialState(deck));
+  const ignoredC = (state: GameState, e: GameEvent) => expect(gameReducer(state, e, ccfg)).toBe(state);
+
+  it('C1. start begins a 3.7 s countdown, and the round has not started', () => {
+    expect(initialState(deck).startsAt).toBeNull();
+    expect(runC([start])).toMatchObject({ phase: 'countdown', startsAt: START_AT, deadline: null });
+  });
+  it('C2. flips, a second start, restart and early ticks change nothing during the countdown', () => {
+    const counting = runC([start]);
+    ignoredC(counting, flip(0, T0 + 100));
+    ignoredC(counting, { type: 'start', at: T0 + 100 });
+    ignoredC(counting, restart(T0 + 2_000));
+    ignoredC(counting, tick(START_AT - 1));
+  });
+  it('C3. a tick at the start time begins the round with the full 20 seconds', () => {
+    expect(runC([start, tick(START_AT)])).toMatchObject({ phase: 'playing', startsAt: null, deadline: START_AT + 20_000 });
+  });
+  it('C4. a flip that arrives at the start time, before any tick, starts the round and opens the card', () => {
+    expect(runC([start, flip(0, START_AT)])).toMatchObject({ phase: 'playing', open: [0], deadline: START_AT + 20_000 });
+  });
+  it('C5. a late tick neither shortens nor lengthens the round', () => {
+    expect(runC([start, tick(START_AT + 1_300)])).toMatchObject({ phase: 'playing', deadline: START_AT + 20_000 });
+  });
+  it('C6. a tick long after the whole round ends it at the right moment', () => {
+    expect(runC([start, tick(T0 + 60_000)])).toMatchObject({ phase: 'timeUp', endedAt: START_AT + 20_000, pairs: 0 });
+  });
+  it('C7. restart stays locked for 500 ms after the round really starts', () => {
+    expect(runC([start, restart(START_AT + 499)]).phase).toBe('playing');
+    expect(runC([start, restart(START_AT + 500)]).phase).toBe('ready');
+  });
+  it('C8. with only a cue configured the countdown lasts just the cue, and with neither the round starts at once', () => {
+    const cueOnly = { ...ccfg, countdownMs: 0 };
+    expect(gameReducer(initialState(deck), start, cueOnly)).toMatchObject({ phase: 'countdown', startsAt: T0 + 700 });
+    const off = { ...ccfg, countdownMs: 0, startCueMs: 0 };
+    expect(gameReducer(initialState(deck), start, off)).toMatchObject({ phase: 'playing', startsAt: null, deadline: T0 + 20_000 });
+  });
+  it('C9. does not mutate the state it is given', () => {
+    const counting = Object.freeze(runC([start]));
+    expect(gameReducer(counting, tick(START_AT), ccfg).phase).toBe('playing');
+    expect(counting).toMatchObject({ phase: 'countdown', startsAt: START_AT });
   });
 });

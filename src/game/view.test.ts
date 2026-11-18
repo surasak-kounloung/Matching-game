@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { testConfig as cfg } from '../test/testConfig';
+import { countdownTestConfig as ccfg, testConfig as cfg } from '../test/testConfig';
 import { buildDeckValues } from './deck';
 import { gameReducer, initialState } from './gameReducer';
 import type { GameEvent } from './types';
-import { faceOf, formatSeconds, prizeFlags, secondsLeft } from './view';
+import { countdownLabel, faceOf, formatSeconds, prizeFlags, secondsLeft } from './view';
 
 const deck = buildDeckValues(cfg);
 const T0 = 1_000;
@@ -53,4 +53,27 @@ it('prizeFlags unlock at 4 and 7 pairs', () => {
   expect(prizeFlags(run([start, ...pairs(3)]), cfg)).toEqual({ prize1: false, prize2: false });
   expect(prizeFlags(run([start, ...pairs(4)]), cfg)).toEqual({ prize1: true, prize2: false });
   expect(prizeFlags(run([start, ...pairs(7)]), cfg)).toEqual({ prize1: true, prize2: true });
+});
+
+describe('during the countdown', () => {
+  const counting = gameReducer(initialState(deck), { type: 'start', at: T0 }, ccfg); // startsAt = T0 + 3700
+  const at = (ms: number) => countdownLabel(counting, T0 + ms, ccfg);
+
+  it('countdownLabel is null outside the countdown', () => {
+    expect(countdownLabel(initialState(deck), T0, ccfg)).toBeNull();
+    const playing = gameReducer(counting, { type: 'tick', at: T0 + 3_700 }, ccfg);
+    expect(countdownLabel(playing, T0 + 3_700, ccfg)).toBeNull();
+  });
+  it('shows 3, 2, 1 for one second each, then the cue until the round starts', () => {
+    expect([0, 999, 1_000, 1_999, 2_000, 2_999].map(at)).toEqual(['3', '3', '2', '2', '1', '1']);
+    expect([3_000, 3_699].map(at)).toEqual(['เริ่ม!', 'เริ่ม!']);
+  });
+  it('never shows 0, a negative number or a number above the configured seconds', () => {
+    expect(at(9_000)).toBe('เริ่ม!'); // the clock ran past the start before a tick arrived
+    expect(at(-500)).toBe('3'); // the clock is read slightly before the press
+  });
+  it('the timer shows the full time and every card stays face down', () => {
+    expect(secondsLeft(counting, T0 + 2_000, ccfg)).toBe(20);
+    expect(counting.cards.every((c) => faceOf(counting, c) === 'down')).toBe(true);
+  });
 });

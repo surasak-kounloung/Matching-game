@@ -41,3 +41,11 @@ it('has delays that are not negative and shorter than the round', () => {
     expect(ms).toBeLessThan(c.timeLimitMs);
   }
 });
+
+it('has a countdown of whole seconds from 0 to 9 and a start cue of at most 2 seconds', () => {
+  expect(Number.isInteger(c.countdownMs / 1_000)).toBe(true);
+  expect(c.countdownMs).toBeGreaterThanOrEqual(0);
+  expect(c.countdownMs).toBeLessThanOrEqual(9_000);
+  expect(c.startCueMs).toBeGreaterThanOrEqual(0);
+  expect(c.startCueMs).toBeLessThanOrEqual(2_000);
+});
