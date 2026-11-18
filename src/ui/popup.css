@@ -43,6 +43,10 @@
   white-space: nowrap;
   color: var(--red);
 }
+/* "ยินดีด้วย!" is green; "หมดเวลาแล้ว!" keeps the red above */
+.popup[data-variant='won'] .popup__headline-text {
+  color: var(--green);
+}
 
 .popup__result {
   position: absolute;

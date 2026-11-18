@@ -30,6 +30,7 @@ export function ResultPopup({ variant, pairs, onRestart }: Props) {
       role="dialog"
       aria-label={headline}
       data-popup
+      data-variant={variant}
       style={{ left: POPUP.left, top: POPUP.top, width: POPUP.width, height: POPUP.height }}
     >
       <div className="popup__headline">
